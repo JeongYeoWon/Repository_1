@@ -34,28 +34,79 @@ int print_introduction_screep() {
     return 0;
 }
 
-void gotoxy(int x, int y) {
+void gotoxy(int x, int y) { // 좌표 설정
     //x, y 좌표 설정
     COORD pos = { x, y };
     //커서 이동
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
 }
 
-int print_stage(int x, int y) {
+int print_stage(int sw, int sh) { // 입력받은 숫자로 좌표 지정 및 크기 조절
     //printf("*"); //스테이지 만들라는 말을 이해하지 못했어요... 아이고 난..
-    gotoxy(x, y);
+    // 헐 스테이지 만들라는 거 이해함 아!!!! 난 바보 멍청이였던거임 좌표설정해서 만들라는게 상자 크기 정하는 거였구나 ㅋ,
+    // 난 멍청이다 아직 이해 못했다.
+    /*gotoxy(sw, sh);
     printf("**************************************\n");
     for (int i = 0; i < 10; i++) {
-        gotoxy(x, y + i + 1);
+        gotoxy(sw, sh + i + 1);
         printf("*                                    *");
     }
-    gotoxy(x, y + 11);
-    printf("**************************************\n");
+    gotoxy(sw, sh + 11);
+    printf("**************************************\n");*/
+
+    // * 과제 3.1사이즈/ 스테이지만들기(5.5)일 경우 아무튼 교수님이 정리해주신다고했으니 걍 기절하고있어야겠다 전 틀렸어요...
+    /* if (map == malloc) { //
+        map = (char**)malloc(sizeof(char*) * stage)
+                for (int i = 0; i < sw; i++) {
+                map[i] = new char[sw];
+            }
+    } */
+
     return 0;
 }
 
 int main()
 {
+
+    // GameState
+    // 0 : 게임 종료
+    // 1 : 시작 화면
+    // 2 : 게임 설명
+    // 3 : 게임 랭킹
+
+    /*char ch = 0;*/
+    int game_state = 1;
+    int sub_title_state = 1;
+
+    while (game_state) {
+        switch (game_state) {
+        case 0:
+            game_state = 0;
+            break;
+        case 1:
+            print_title_screen();
+            sub_title_state = 1;
+            while (sub_title_state) {
+                char ch = _getch();
+                switch (ch) {
+                case 0:
+                    game_state = 0; break;
+                case 1:
+                    game_state = 1; break;
+                case 2:
+                    game_state = 2; break;
+                case 3:
+                    game_state = 3; break;
+                default: break;
+                }
+            }
+            break;
+        case 2: break;
+        case 3: break;
+        }
+    }
+
+    /* // 내가 했던 것
     gotoxy(10, 5);
     printf("여기가 (10, 5)입니다.\n");
 
@@ -65,7 +116,7 @@ int main()
     bool firststate = false;
     bool secondstate = false;
     bool stage = false;
-
+     
     while(is_game_running){
         char ch = 0;
 
@@ -93,7 +144,7 @@ int main()
         case 1:
             if (!stage) {
                 ch = 0;
-                printf("좌표를 설정해 주세요! => ");
+                printf("크기를 설정해 주세요! => ");
                 if (scanf_s("%d%d", &n1, &n2) != 2) { // scanf에서 입력을 받아왔을 때 값 2개를 못 받아오면
                     while (getchar() != '\n'); //엔터 누르기 전까지 반복
                     break; //if문 빠져나옴
@@ -118,6 +169,16 @@ int main()
                 }
                 secondstate = true;
             }
+            /*print_introduction_screep();
+            ch = _getch();
+            switch (ch) {
+            case 'y': 
+                firststate = false;
+                game_state = 0; break;
+            case 'n': break;
+            default: break;
+            } //주석 달아야함
+
             if (ch == 'y' || ch == 'Y') {
                 firststate = false;
                 game_state = 0;
@@ -132,7 +193,7 @@ int main()
         default: break;
         }
             //getch
-    }
+    }*/
 }
 
 // 프로그램 실행: <Ctrl+F5> 또는 [디버그] > [디버깅하지 않고 시작] 메뉴

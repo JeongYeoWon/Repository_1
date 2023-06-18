@@ -12,4 +12,4 @@ void ClearBuffer(); // 화면 버퍼 초기화(빈공간을 만들어요~)
 
 void ClearScreen();
 
-int WriteToBuffer(int x, int y, const char* str);
+int WriteToBuffer(int x, int y, const char* str); // 글씨 좌표 위치에 출력함

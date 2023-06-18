@@ -79,7 +79,7 @@ void ClearBuffer() {
 	ScreenBuffer[(y * (screenWidth + 3))] = '\0';
 }
 
-void ClearScreen() {
+/*void ClearScreen() {
 	int y = 0;
 	while (y < screenHeight + 2) {
 		int x = 0;
@@ -101,7 +101,7 @@ void ClearScreen() {
 		y = y + 1;
 	}
 	ScreenBuffer[(y * (screenWidth + 3))] = '\0';
-}
+}*/
 
 int WriteToBuffer(int x, int y, const char* str) { // x, y가 배열의 밖으로 넘어갈 경우를 대비해 int,,,,
 	int i = 0;

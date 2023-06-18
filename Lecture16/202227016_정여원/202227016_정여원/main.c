@@ -73,6 +73,12 @@ int main()
 				GameState = 0;
 			}
 		}
+
+		if (snakeSkin[0].posX == apple.posX && snakeSkin[0].posY == apple.posY)
+		{
+			Sleep(22);
+		}
+
 	}
 
 	CHECKERROR(Release()); // 해제해주기
@@ -243,9 +249,9 @@ int DrawBuffer(int DeltaTime) // 출력함
 {
 	ProcessInput(); // 방향키 제어
 
-	setCursorPos(0, 0); // 출력할 좌표
-	SetColor(0b1111, 0b0000); // 색상
-	printf("%s", ScreenBuffer);
+	//setCursorPos(0, 0); // 출력할 좌표
+	//SetColor(0b1111, 0b0000); // 색상
+	//printf("%s", ScreenBuffer);
 
 	DeltaTimeSum = DeltaTimeSum + DeltaTime; // 게임 루프 사이의 경과 시간
 	if (DeltaTimeSum >= 500) // 시간이 500보다 크거나 같을때,,??

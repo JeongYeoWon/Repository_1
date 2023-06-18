@@ -3,6 +3,7 @@
 #include "screen.h"
 
 void introMenu() {
+	setCursorPos(0, 0);
 	SetColor(0b1111, 0b0000);
 	WriteToBuffer(30, 6, "지렁이 게임");
 	WriteToBuffer(4, 13, "1. 게임 시작");
@@ -11,7 +12,14 @@ void introMenu() {
 	WriteToBuffer(4, 19, "4. 게임 종료");
 }
 
+//void ClearScreen() {
+//	setCursorPos(0, 0);
+//	SetColor(0b0001, 0b0001);
+//	setScreenSize(70, 20); // 화면을 초기화
+//}
+
 void GameStory() {
+	setCursorPos(0, 0);
 	SetColor(0b0000, 0b0000);
 	setScreenSize(50, 10);
 	ClearBuffer();

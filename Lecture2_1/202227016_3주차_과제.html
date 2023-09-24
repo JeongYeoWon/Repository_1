@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{
+            margin : 0;
+            padding : 0;
+        }
+        #box{
+            margin : auto;
+            margin-top : 30px;
+            width : 900px;
+            height : 600px;
+            background-color : aliceblue;
+            border : 3px solid black;
+        }
+        #log{
+            width : 900px;
+            height : 150px;
+            border-bottom : 3px solid black;
+            /* background-color : red; */
+            text-align: left;
+        }
+        #log h1{
+            padding : 10px;
+        }
+        #lT{
+            margin : 10px;
+            width : 100px;
+            height : 20px;
+        }
+        #logBtn{
+            width : 50px;
+        }
+        #img{
+            display : none;
+            float: right;
+            margin-right: 500px;
+            margin-top : -10px;
+            width : 100px;
+        }
+        #bo2_1, #box2_2{
+            vertical-align: top;
+        }
+        #box2_1{
+            display : inline-block;
+            width : 200px;
+            height : 447px;
+            border-right : 3px solid black;
+            /* background-color : blue; */
+            text-align : left;
+        }
+        #box2_2{
+            display : inline-block;
+            width : 697px;
+            height : 447px;
+            /* background-color : yellow; */
+            text-align : left;
+        }
+        .btn{
+            display : inline-block;
+            margin-left : 50px;
+            margin-top : 75px;
+            width : 100px;
+            height : 50px;
+        }
+    </style>
+    <script>
+        window.onload = function(){
+            var id = document.getElementById('lT');
+            var msg = document.createElement('p');
+            var title = document.getElementById('title');
+            var img = document.getElementById('img');
+            var help = document.createElement('p');
+            var tp = "";
+
+            var btn1 = document.getElementsByClassName("btn")[0];
+            var btn2 = document.getElementsByClassName("btn")[1];
+            var btn3 = document.getElementsByClassName("btn")[2];
+            document.getElementById('logBtn').addEventListener('click', function(){
+                var idLog = id.value;
+                document.getElementById('log').appendChild(msg);
+                if(idLog == "교수님"){
+                    msg.textContent = "로그인되었습니다!";
+                    id.style.display = "none";
+                    title.textContent = "교수님";
+                    img.style.display = 'block';
+                    
+                    document.getElementById('logBtn').style.width = '70px';
+                    document.getElementById('logBtn').textContent = "로그아웃";
+
+                    btn1.addEventListener('click', function(){
+                        if(tp == "" || tp != "죄송합니다 교수님 사실 문제를 이해하지 못했어요 하하~"){
+                            help.textContent = "죄송합니다 교수님 사실 문제를 이해하지 못했어요 하하~";
+                        }
+                        document.getElementById('box2_2').appendChild(help);
+
+                        if(help.textContent == "저장되었습니다."){
+                                alert("내용이 없습니다.");
+                            }
+                    })
+                    btn2.addEventListener('click', function(){
+                        if(tp == "" || tp != "아이고"){
+                                help.textContent = "아이고";
+                        }
+
+                        document.getElementById('box2_2').appendChild(help);
+                        if(help.textContent == "저장되었습니다."){
+                                alert("내용이 없습니다.");
+                            }
+                    })
+                    btn3.addEventListener('click', function(){
+                            if(help.textContent != ""){
+                                tp = help.textContent;
+                                help.textContent = "저장되었습니다.";
+                                document.getElementById('box2_2').appendChild(help);
+                            }
+                        })
+                }
+                else{
+                    msg.textContent = "로그인 실패하셨습니다!";
+                }
+            })
+        }
+    </script>
+</head>
+<body>
+    <div id = "box">
+        <div id = "log"><h1 id = "title">로그인</h1><input id = "lT" type="text"><button id = "logBtn">로그인</button><img id="img" src="image/무제2.png" alt="프로필 이미지"></div>
+        <div id = "box2_1"><button class = "btn">1</button><button class = "btn">2</button><button class = "btn">3</button></div><div id = "box2_2"></div>
+    </div>
+</body>
+</html>

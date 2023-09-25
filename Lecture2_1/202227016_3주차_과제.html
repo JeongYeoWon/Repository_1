@@ -76,7 +76,7 @@
             var title = document.getElementById('title');
             var img = document.getElementById('img');
             var help = document.createElement('p');
-            var tp = "";
+            var btn3_text = "";
 
             var btn1 = document.getElementsByClassName("btn")[0];
             var btn2 = document.getElementsByClassName("btn")[1];
@@ -94,6 +94,19 @@
                     document.getElementById('logBtn').textContent = "로그아웃";
 
                     btn1.addEventListener('click', function(){
+                        
+                    })
+
+                    btn3.addEventListener('click', function(){
+                        document.textContent = btn3_text;
+                            if(btn3_text != ""){
+                                btn3_text = help.textContent;
+                                help.textContent = "저장되었습니다.";
+                                document.getElementById('box2_2').appendChild(help);
+                            }
+                        })
+
+                    /* btn1.addEventListener('click', function(){
                         if(tp == "" || tp != "죄송합니다 교수님 사실 문제를 이해하지 못했어요 하하~"){
                             help.textContent = "죄송합니다 교수님 사실 문제를 이해하지 못했어요 하하~";
                         }
@@ -119,7 +132,7 @@
                                 help.textContent = "저장되었습니다.";
                                 document.getElementById('box2_2').appendChild(help);
                             }
-                        })
+                        }) */
                 }
                 else{
                     msg.textContent = "로그인 실패하셨습니다!";

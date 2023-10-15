@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        p{
+            background-color: aliceblue;
+        }
+    </style>
+    <script>
+        window.onload = function(){
+            const port = 2306;
+            document.getElementById('btn').addEventListener('click', function(){
+                fetch(`http://localhost:${port}/hi`)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById("text").textContent = data;
+                })
+            })
+        }
+    </script>
+</head>
+<body>
+    <button id = "btn">버튼</button>
+    <p id = "text">살려줘ㅜ</p>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #AppMain{
+            margin : auto;
+            width : 500px;
+            height : 700px;
+            border : 1px solid black;
+            background-color : aliceblue;
+        }
+        #logout_menu{
+            display : none;
+        }
+        img{
+            display: block;
+            width : 100px;
+        }
+    </style>
+</head>
+<body>
+    <div id = 'AppMain'>
+        <div id = "login">
+            <center>
+                <div id="login_menu">
+                    <input id = "user_identifier" required type="text">
+                    <button id = "login_button" onclick="login_ButtonClick()" >로그인</button>
+                </div>
+                <div id="logout_menu">
+                    <img id = "logout_image"src = "image/무제2.png">
+                    <button id = "logout_button" onclick="logout_ButtonClick()" >로그아웃</button>
+                </div>
+            </center>
+        </div>
+    </div>
+    <script>
+        function login_ButtonClick(){
+            let id_value = document.getElementById('user_identifier').value;
+            if(id_value == "유한"){
+                document.getElementById('login_menu').style.display = 'none';
+                document.getElementById('logout_menu').style.display = 'block';
+            }
+        }
+        function logout_ButtonClick(){
+            document.getElementById('login_menu').style.display = 'block';
+                document.getElementById('logout_menu').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<html>
+<body>
+    <canvas id="you_sihum_average_80" width="1024" height="768"></canvas>
+    <script>
+        //Canvas Context
+        const canvas = document.getElementById('you_sihum_average_80');
+        const ctx = canvas.getContext('2d');
+        const degree = Math.PI/360.0;
+        var angle = 0;
+        
+        //게임루프
+        setInterval(gameLoop, 1000/60);       
+
+        //함수
+        function gameLoop() {
+            // Canvas 지우기
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            angle += degree;
+            ctx.translate(200,200);
+            ctx.rotate(angle);                  
+            ctx.fillStyle = '#00FF00';                 
+            ctx.fillRect(-100, -100, 200, 200);
+            ctx.restore();
+            
+            ctx.fillStyle = '#0000FF';
+            ctx.fillRect(200, 200, 150, 150);
+        }
+    </script>
+</body>
+</html>

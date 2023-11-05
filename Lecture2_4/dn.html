@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>왜이래</title>
+    <style>
+        *{
+            margin : auto;
+            padding : 0;
+        }
+        #help{
+            width : 1000px;
+            height : 800px;
+            background-color: aliceblue;
+            text-align : center;
+        }
+        #gameName{
+            font-weight : bold;
+        }
+        #title{
+            margin : 0;
+            background-color: antiquewhite;
+            font-size : 100px;
+            text-align : center;
+        }
+        canvas{
+            margin : 50px;
+            width : 500px;
+            height : 500px;
+            border : 1px solid black;
+        }
+    </style>
+    <script>
+        window.onload = function(){
+            var canvas = document.getElementById('canvas');
+            var ctx = canvas.getContext('2d');
+
+            function gameLoop(){
+
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id = "help">
+        <div id = "title"><p id = "gameName">뱀 게임</p></div>
+        <div id = "data">시간 : <span id = "time">0</span> 뱀 길이 : <span id = "length">1</span></div>
+        <canvas id = "canvas"></canvas>
+    </div>
+</body>
+</html>

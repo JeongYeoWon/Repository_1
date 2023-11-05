@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        window.onload = function(){
+            var canvas = document.getElementById('canvas');
+            var context = canvas.getContext("2d");
+
+            function drawHeart() {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.beginPath();
+
+                for (var t = 0; t <= Math.PI; t += 0.01) {
+                    var x = 15 * Math.sin(t)*Math.sin(t)*Math.sin(t);
+                    var y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+                    x = x * 10 + canvas.width / 2; // 캔버스 중앙으로 이동
+                    y = -y * 10 + canvas.height / 2; // 캔버스 중앙으로 이동
+
+                    context.lineTo(x, y);
+                }
+                x = -x * 10 + canvas.width / 2;
+                for (var t = 0; t <= Math.PI; t += 0.01) {
+                    var x = 16 * Math.sin(t)*Math.sin(t)*Math.sin(t);
+                    var y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+                    x = -x * 10 + canvas.width / 2; // 캔버스 중앙으로 이동
+                    y = -y * 10 + canvas.height / 2; // 캔버스 중앙으로 이동
+
+                    context.lineTo(x, y);
+                }
+
+                context.fillStyle = "red"; // 하트 모양의 색상 설정
+                context.fill();
+            }
+            drawHeart();
+        }
+    </script>
+</head>
+<body>
+    <canvas id = "canvas" width="400" height="400"></canvas>
+</body>
+</html>

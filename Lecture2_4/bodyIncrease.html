@@ -1,0 +1,78 @@
+<html>
+<body>
+    <canvas id="you_sihum_average_80" width="1024" height="768"></canvas>
+    <script>
+        //Canvas Context
+        const canvas = document.getElementById('you_sihum_average_80');
+        const ctx = canvas.getContext('2d');
+        
+        //전역변수
+        var mouseX = 0;
+        var mouseY = 0;
+        var player = [];
+
+        //클래스
+        class PlayerBodyObject{
+            constructor(){
+                this.PlayerPosX = 100;
+                this.PlayerPosY = 100;
+                this.dirX=0;
+                this.dirY=0;
+                this.speed = 5;
+                this.size = 20;
+                this.color = '#0000FF';
+            }
+            UpdatePosition(){            
+                this.dirX = mouseX - this.PlayerPosX;
+                this.dirY = mouseY - this.PlayerPosY;
+
+                let scalar = Math.sqrt((this.dirX*this.dirX) + (this.dirY*this.dirY));
+
+                this.dirX /=scalar;
+                this.dirY /=scalar;
+
+                if(scalar>20){
+                    this.PlayerPosX += this.dirX*this.speed;
+                    this.PlayerPosY += this.dirY*this.speed;
+                }
+            }
+            draw() {
+                // 원 그리기
+                ctx.beginPath();
+                ctx.arc(this.PlayerPosX, this.PlayerPosY, this.size, 0, 2 * Math.PI);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }            
+        }
+
+        //실행코드
+        document.addEventListener('mousemove', onMousemove);
+        document.addEventListener('click', onClick);
+ 
+        //게임루프
+        setInterval(gameLoop, 1000/60);        
+
+        //함수
+        function gameLoop() {
+            // Canvas 지우기
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < player.length; i++) {
+                player[i].UpdatePosition();
+                player[i].draw();
+            }
+        }
+        
+        function onMousemove(event)
+        {
+            mouseX = event.clientX; // 마우스 커서의 X 좌표
+            mouseY = event.clientY; // 마우스 커서의 Y 좌표
+        }
+
+        function onClick(event)
+        {
+            player.push(new PlayerBodyObject());
+        }        
+    </script>
+</body>
+</html>

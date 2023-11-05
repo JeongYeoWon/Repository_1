@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        canvas {
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="heartCanvas" width="400" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById("heartCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let heart = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            scale: 1,
+            rotation: 0
+        };
+
+        // 그림을 그리는 함수
+        function drawHeart() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 하트 모양 그리기
+            ctx.beginPath();
+            for (let t = 0; t <= 2 * Math.PI; t += 0.01) {
+                const x = heart.x + 16 * Math.pow(Math.sin(t), 3);
+                const y = heart.y - (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+                ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.stroke();
+        }
+        function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawHeart();
+    drawLeftHandle();
+    drawRightHandle();
+}
+
+        // 드래그 이벤트 처리
+        let isDragging = false;
+        let dragStartX, dragStartY;
+        canvas.addEventListener("mousedown", (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            // 마우스 클릭 위치가 하트 내부에 있는지 확인
+            if (mouseX >= heart.x - 20 && mouseX <= heart.x + 20 && mouseY >= heart.y - 20 && mouseY <= heart.y + 20) {
+                isDragging = true;
+                dragStartX = mouseX - heart.x;
+                dragStartY = mouseY - heart.y;
+            }
+        });
+
+        canvas.addEventListener("mousemove", (e) => {
+            if (isDragging) {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+
+                // 드래그 중인 위치에 따라 하트 이동
+                heart.x = mouseX - dragStartX;
+                heart.y = mouseY - dragStartY;
+                drawHeart();
+            }
+        });
+
+        canvas.addEventListener("mouseup", () => {
+            isDragging = false;
+        });
+
+        // 확대/축소 및 회전 함수
+        function hwTranslateMatrix(x, y) {
+            return [1, 0, 0, 1, x, y];
+        }
+
+        // 확대/축소행렬을 생성하는 함수
+        function hwScaleMatrix(scaleX, scaleY) {
+            return [scaleX, 0, 0, scaleY, 0, 0];
+        }
+
+        // 회전행렬을 생성하는 함수
+        function hwRotationMatrix(theta) {
+            const cosTheta = Math.cos(theta);
+            const sinTheta = Math.sin(theta);
+            return [cosTheta, sinTheta, -sinTheta, cosTheta, 0, 0];
+        }
+
+        // 변환 행렬을 곱하는 함수
+        function hwMatrixMultiply(matrixA, matrixB) {
+            const a11 = matrixA[0];
+            const a12 = matrixA[1];
+            const a21 = matrixA[2];
+            const a22 = matrixA[3];
+            const a31 = matrixA[4];
+            const a32 = matrixA[5];
+
+            const b11 = matrixB[0];
+            const b12 = matrixB[1];
+            const b21 = matrixB[2];
+            const b22 = matrixB[3];
+            const b31 = matrixB[4];
+            const b32 = matrixB[5];
+
+            const result = [
+                a11 * b11 + a12 * b21,
+                a11 * b12 + a12 * b22,
+                a21 * b11 + a22 * b21,
+                a21 * b12 + a22 * b22,
+                a31 * b11 + a32 * b21 + b31,
+                a31 * b12 + a32 * b22 + b32
+            ];
+
+            return result;
+        }
+
+        // 이동
+        function translate(x, y) {
+            const translationMatrix = hwTranslateMatrix(x, y);
+            // 변환 행렬 곱하기
+            // 이하 코드는 이전에 사용한 ctx.translate(heart.x, heart.y);와 동일한 작업을 합니다.
+            // 여기에서는 직접 변환 행렬을 만들고 적용합니다.
+            // 다른 변환도 이와 유사하게 구현할 수 있습니다.
+            const oldTransform = ctx.getTransform();
+            const newTransform = hwMatrixMultiply(translationMatrix, [
+                oldTransform.a, oldTransform.b, oldTransform.c, oldTransform.d, oldTransform.e, oldTransform.f
+            ]);
+            ctx.setTransform(newTransform.a, newTransform.b, newTransform.c, newTransform.d, newTransform.e, newTransform.f);
+        }
+
+        // 확대/축소
+        function scale(scaleX, scaleY) {
+            const scaleMatrix = hwScaleMatrix(scaleX, scaleY);
+            const oldTransform = ctx.getTransform();
+            const newTransform = hwMatrixMultiply(scaleMatrix, [
+                oldTransform.a, oldTransform.b, oldTransform.c, oldTransform.d, oldTransform.e, oldTransform.f
+            ]);
+            ctx.setTransform(newTransform.a, newTransform.b, newTransform.c, newTransform.d, newTransform.e, newTransform.f);
+        }
+
+        // 회전
+        function rotate(theta) {
+            const rotationMatrix = hwRotationMatrix(theta);
+            const oldTransform = ctx.getTransform();
+            const newTransform = hwMatrixMultiply(rotationMatrix, [
+                oldTransform.a, oldTransform.b, oldTransform.c, oldTransform.d, oldTransform.e, oldTransform.f
+            ]);
+            ctx.setTransform(newTransform.a, newTransform.b, newTransform.c, newTransform.d, newTransform.e, newTransform.f);
+        }
+
+        const leftHandle = {
+            x: heart.x - 20, // 왼쪽에 위치
+            y: heart.y, // 하트 중앙에 위치
+            radius: 5, // 반지름 크기
+            isDragging: false
+        };
+
+        // 오른쪽 원형 핸들의 정보 (회전용)
+        const rightHandle = {
+            x: heart.x + 20, // 오른쪽에 위치
+            y: heart.y, // 하트 중앙에 위치
+            radius: 5, // 반지름 크기
+            isDragging: false
+        };
+
+        // 왼쪽 원형 핸들 그리기 함수
+        function drawLeftHandle() {
+            ctx.beginPath();
+            ctx.arc(leftHandle.x, leftHandle.y, leftHandle.radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'red'; // 원형 핸들 색상
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // 오른쪽 원형 핸들 그리기 함수
+        function drawRightHandle() {
+            ctx.beginPath();
+            ctx.arc(rightHandle.x, rightHandle.y, rightHandle.radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'blue'; // 원형 핸들 색상
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // 화면 그리는 함수 (하트와 핸들 모두 그림)
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawHeart();
+            drawLeftHandle();
+            drawRightHandle();
+        }
+
+        // 이벤트 리스너 등록
+        canvas.addEventListener("mousedown", (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            if (Math.sqrt((mouseX - leftHandle.x) ** 2 + (mouseY - leftHandle.y) ** 2) <= leftHandle.radius) {
+                leftHandle.isDragging = true;
+            }
+
+            if (Math.sqrt((mouseX - rightHandle.x) ** 2 + (mouseY - rightHandle.y) ** 2) <= rightHandle.radius) {
+                rightHandle.isDragging = true;
+            }
+        });
+
+        canvas.addEventListener("mousemove", (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            if (leftHandle.isDragging) {
+                // 왼쪽 핸들 드래그 중
+                const newRadius = Math.max(1, Math.abs(leftHandle.x - mouseX));
+                leftHandle.radius = newRadius;
+                scale(newRadius / 5, 1); // 확대/축소 적용
+                draw();
+            }
+
+            if (rightHandle.isDragging) {
+                // 오른쪽 핸들 드래그 중
+                const deltaY = mouseY - rightHandle.y;
+                const theta = deltaY / 20; // 회전 각도 계산
+                rotate(theta); // 회전 적용
+                draw();
+            }
+        });
+        draw();
+
+        // drawRightHandle 함수에서 오른쪽 핸들 위치 업데이트
+        
+        // const canvas = document.getElementById("heartCanvas");
+        // const ctx = canvas.getContext("2d");
+
+        // let heart = {
+        //     x: canvas.width / 2,
+        //     y: canvas.height / 2,
+        //     scale: 1,
+        //     rotation: 0,
+        // };
+
+        // let originalHeartScale = 1;
+
+        // const leftHandle = {
+        //     x: heart.x - 20, // 왼쪽에 위치
+        //     y: heart.y, // 하트 중앙에 위치
+        //     radius: 5, // 반지름 크기
+        //     isDragging: false,
+        // };
+
+        // const rightHandle = {
+        //     x: heart.x + 20, // 오른쪽에 위치
+        //     y: heart.y, // 하트 중앙에 위치
+        //     radius: 5, // 반지름 크기
+        //     isDragging: false,
+        // };
+
+        // let transformedLeftHandle;
+        // let transformedRightHandle;
+
+        // function drawHeart() {
+        //     const handleToLeft = {
+        //         x: leftHandle.x - heart.x,
+        //         y: leftHandle.y - heart.y
+        //     };
+
+        //     const handleToRight = {
+        //         x: rightHandle.x - heart.x,
+        //         y: rightHandle.y - heart.y
+        //     };
+
+        //     transformedLeftHandle = {
+        //         x: heart.x + handleToLeft.x * heart.scale,
+        //         y: heart.y + handleToLeft.y * heart.scale
+        //     };
+
+        //     transformedRightHandle = {
+        //         x: heart.x + handleToRight.x * heart.scale,
+        //         y: heart.y + handleToRight.y * heart.scale
+        //     };
+
+        //     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        //     ctx.beginPath();
+        //     for (let t = 0; t <= 2 * Math.PI; t += 0.01) {
+        //         const x = heart.x + 16 * Math.pow(Math.sin(t), 3) * heart.scale;
+        //         const y =
+        //             heart.y -
+        //             (13 * Math.cos(t) -
+        //                 5 * Math.cos(2 * t) -
+        //                 2 * Math.cos(3 * t) -
+        //                 Math.cos(4 * t)) *
+        //             heart.scale;
+        //         ctx.lineTo(x, y);
+        //     }
+        //     ctx.closePath();
+        //     ctx.stroke();
+
+        //     drawHandle(leftHandle, "red"); // 왼쪽 원을 그립니다.
+        //     drawHandle(transformedRightHandle, "blue");
+        // }
+
+        // function drawHandle(handle, color) {
+        //     ctx.beginPath();
+        //     ctx.arc(handle.x, handle.y, leftHandle.radius, 0, Math.PI * 2);
+        //     ctx.fillStyle = color;
+        //     ctx.fill();
+        //     ctx.closePath();
+        // }
+
+        // function draw() {
+        //     drawHeart();
+        // }
+
+        // canvas.addEventListener("mousedown", (e) => {
+        //     const rect = canvas.getBoundingClientRect();
+        //     const mouseX = e.clientX - rect.left;
+        //     const mouseY = e.clientY - rect.top;
+
+        //     if (
+        //         Math.sqrt((mouseX - heart.x) ** 2 + (mouseY - heart.y) ** 2) <=
+        //         leftHandle.radius
+        //     ) {
+        //         heart.isDragging = true;
+        //     }
+
+        //     if (
+        //         Math.sqrt((mouseX - transformedLeftHandle.x) ** 2 + (mouseY - transformedLeftHandle.y) ** 2) <=
+        //         leftHandle.radius
+        //     ) {
+        //         leftHandle.isDragging = true;
+        //     }
+
+        //     if (
+        //         Math.sqrt((mouseX - transformedRightHandle.x) ** 2 + (mouseY - transformedRightHandle.y) ** 2) <=
+        //         rightHandle.radius
+        //     ) {
+        //         rightHandle.isDragging = true;
+        //     }
+        // });
+
+        // canvas.addEventListener("mouseup", () => {
+        //     heart.isDragging = false;
+        //     leftHandle.isDragging = false;
+        //     rightHandle.isDragging = false;
+        // });
+
+        // canvas.addEventListener("mousemove", (e) => {
+        //     const rect = canvas.getBoundingClientRect();
+        //     const mouseX = e.clientX - rect.left;
+        //     const mouseY = e.clientY - rect.top;
+
+        //     if (heart.isDragging) {
+        //         heart.x = mouseX;
+        //         heart.y = mouseY;
+        //     }
+
+        //     if (leftHandle.isDragging) {
+        //         // Calculate the distance between the mouse and the heart's center
+        //         const distance = Math.sqrt((heart.x - mouseX) ** 2 + (heart.y - mouseY) ** 2);
+        //         // Update the heart's scale based on the distance
+        //         heart.scale = distance / leftHandle.radius;
+        //         // Move the left handle along with the heart
+        //         leftHandle.x = heart.x - leftHandle.radius;
+        //         leftHandle.y = heart.y;
+        //     }
+
+        //     if (rightHandle.isDragging) {
+        //         // Calculate the angle based on the mouse position and the heart's center
+        //         const angle = Math.atan2(mouseY - heart.y, mouseX - heart.x);
+        //         // Update the right handle position based on the angle and radius
+        //         rightHandle.x = heart.x + rightHandle.radius * Math.cos(angle);
+        //         rightHandle.y = heart.y + rightHandle.radius * Math.sin(angle);
+        //         // Calculate the new heart rotation
+        //         heart.rotation = angle;
+        //     }
+
+        //     draw();
+        // });
+
+        // draw();
+        // canvas.addEventListener("mouseup", () => {
+        //     leftHandle.isDragging = false;
+        //     rightHandle.isDragging = false;
+        // });
+        // draw();
+    </script>
+</body>
+</html>

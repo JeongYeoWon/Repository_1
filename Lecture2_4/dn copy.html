@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>왜이래</title>
+    <style>
+        *{
+            margin : auto;
+            padding : 0;
+        }
+        #help{
+            width : 1000px;
+            height : 800px;
+            background-color: aliceblue;
+            text-align : center;
+        }
+        #gameName{
+            font-weight : bold;
+        }
+        #title{
+            margin : 0;
+            background-color: antiquewhite;
+            font-size : 100px;
+            text-align : center;
+        }
+        #data{
+            margin : 20px;
+            font-size : 30px;
+            font-weight : bold;
+        }
+        canvas{ /* 레이아웃의 크기만 조절함 나는 그것도 모르고 몇 시간을 뻘 짓하고 있었고... */
+            margin : 20px;
+            width : 500px;
+            height : 500px;
+            border : 1px solid black;
+        }
+    </style>
+    <script>
+        window.onload = function(){
+            var canvas = document.getElementById('canvas');
+            var ctx = canvas.getContext('2d');
+
+            // 마우스 좌표 저장할 변수
+            var mouseX = 250;
+            var mouseY = 250;
+            // 지렁이의 몸이 되어 줄 배열
+            var player = [];
+
+            // 지렁이 객체 클래스
+            class PlayerBodyObject{
+                constructor(){
+                    this.playerPosX = 0;
+                    this.playerPosY = 0;
+                    this.dirX = 0;
+                    this.dirY = 0;
+                    this.speed = 5;
+                    this.size = 20;
+                    this.color = "#000000";
+                }
+                // 지렁이의 위치 및 이동
+                palyerPosition(){
+                    this.dirX = mouseX - this.playerPosX;
+                    this.dirY = mouseY - this.playerPosY;
+
+                    let scalar = Math.sqrt((this.dirX*this.dirX) + (this.dirY*this.dirY));
+
+                    this.dirX /=scalar;
+                    this.dirY /=scalar;
+
+                    if(scalar>20){
+                        this.playerPosX += this.dirX*this.speed;
+                        this.playerPosY += this.dirY*this.speed;
+                    }
+                }
+                // 원 그림
+                draw(){
+                ctx.beginPath();
+                ctx.arc(this.playerPosX, this.playerPosY, this.size, 0, 2 * Math.PI);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                }
+            }
+            // 사과 객체 클래스
+            class AppleObject{
+                constructor(){
+
+                }
+            }
+
+            // 사과 객체 클래스
+            class ObstacleObject{
+                constructor(){
+
+                }
+            }
+            
+            setInterval(gameLoop, 1000/60);
+            
+            function gameLoop() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let i = 0; i < player.length; i++) {
+                player[i].palyerPosition();
+                player[i].draw();
+                }
+            }
+            
+            // 마우스가 움직일 때 onMousemove함수를 불러옴
+            document.addEventListener('mousemove', onMouseMove);
+            
+            // 캔버스 요소의 위치 및 크기 정보 (마우스 커서와 원의 위치를 조정함)
+            var rect = canvas.getBoundingClientRect();
+            
+            // 마우스가 움직일 때마다 실행 됨
+            function onMouseMove(event){
+                //mouseX의 좌표를 마우스 커서의 좌표에 대입
+                mouseX = event.clientX - rect.left;
+                //mouseY의 좌표를 마우스 커서의 좌표에 대입
+                mouseY = event.clientY - rect.top;
+            }
+
+            document.addEventListener('click', onClick);
+
+            function onClick(event)
+            {
+                player.push(new PlayerBodyObject());
+            }  
+        }
+    </script>
+</head>
+<body>
+    <div id = "help">
+        <div id = "title"><p id = "gameName">뱀 게임</p></div>
+        <div id = "data">시간 : <span id = "time">0</span>&emsp; 뱀 길이 : <span id = "length">1</span></div>
+        <!-- 헐 모르고 css에서 계속 크기 조정하다가 이상하길래 여기에 했더니 해결됐네... -->
+        <canvas id = "canvas" width = "500" height = "500"></canvas>
+        <!-- 실제 캔버스의 크기를 정함 -->
+    </div>
+</body>
+</html>

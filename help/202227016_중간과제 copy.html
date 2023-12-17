@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{
+            margin : auto;
+            padding : 0;
+        }
+        #box{
+            width : 800px;
+            border : 1px solid black;
+            /* background-color: antiquewhite; */
+        }
+        #title{
+            border-bottom : 1px solid black;
+        }
+        canvas{
+            margin : 10px;
+            border : 1px solid black;
+        }
+        #inspector{
+            margin : 10px;
+            margin-left : 0;
+            float : right;
+            width : 366px;
+            height : 400px;
+            border : 1px solid black;
+            background-color: aliceblue;
+        }
+        #transform{
+            margin-top : 10px;
+            width : 350px;
+            border : 1px solid black;
+        }
+        #tooltitle{
+            width : 350px;
+            border-bottom : 1px solid black;
+        }
+        .tool{
+            margin-top : 10px;
+            display : block;
+            text-align: right;
+        }
+        span{
+            margin-left: 45px;
+            margin-right : 10px;
+        }
+        input{
+            width : 80px;
+        }
+        .btn{
+            display: block;
+            margin-left : 20px;
+            margin-top : 30px;
+            width :200px;
+            height : 50px;
+            border : 1px solid black;
+            border-radius: 10px;
+            text-align : center;
+            line-height: 50px;
+        }
+    </style>
+    <script>
+        window.onload = function(){
+            // 좌표
+            var pstX = document.getElementById("pst_x");
+            var pstY = document.getElementById("pst_y");
+            // 회전
+            var rtX = document.getElementById("rt_x");
+            var rtY = document.getElementById("rt_y");
+            // 크기
+            var scX = document.getElementById("sc_x");
+            var scY = document.getElementById("sc_y");
+
+            var canvas = document.getElementById("myCanvas");
+            var ctx = canvas.getContext("2d");
+            
+            var heart = {
+                x : 200,
+                y : 200,
+                width : 5,
+                height : 5,
+                color : 'red',
+                isDragging: false,
+                dragStartX: 0,
+                dragStartY: 0,
+            }
+
+            canvas.addEventListener("mousedown", (e) => {
+                var rect = canvas.getBoundingClientRect();
+                var mouseX = e.clientX - rect.left;
+                var mouseY = e.clientY - rect.top;
+
+                // 마우스 클릭 위치가 하트 내부에 있는지 확인
+                if (mouseX >= heart.x - 50 && mouseX <= heart.x + 50 && mouseY >= heart.y - 50 && mouseY <= heart.y + 50) {
+                    heart.isDragging = true;
+                    heart.dragStartX = mouseX - heart.x;
+                    heart.dragStartY = mouseY - heart.y;
+                }
+                console.log("x"+heart.dragStartX);
+                console.log("y"+heart.dragStartY);
+            })
+
+            // 행렬을 적용하는 함수
+            function applyMatrix(matrix){
+                heart.x = matrix[0][2];
+                heart.y = matrix[1][2];
+            }
+
+            canvas.addEventListener("mousemove", (e) => {
+                if (heart.isDragging) {
+                    var mouseX = e.clientX;
+                    var mouseY = e.clientY;
+                    console.log("x"+heart.dragStartX);
+                    console.log("y"+heart.dragStartY);
+                    // 마우스 이동에 따라 하트의 위치 업데이트
+                    var translationMatrix = hwTranslateMatrix(mouseX - heart.dragStartX, mouseY - heart.dragStartY);
+                    var scaleMatrix = hwScaleMatrix(heart.width, heart.height);
+                    var rotationMatrix = hwRotationMatrix(0); // 0을 수정하여 원하는 각도로 회전
+
+                    var combinedMatrix = hwMatrixMultiply(rotationMatrix, hwMatrixMultiply(scaleMatrix, translationMatrix));
+
+                    applyMatrix(combinedMatrix);
+
+                    drawHeart();
+                }
+            });
+
+            canvas.addEventListener("mouseup", () => {
+                heart.isDragging = false;
+            })
+
+            function drawHeart(x1, y1) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                // 하트를 그리기 위한 코드는 여기에 그대로 둡니다.
+                ctx.beginPath();
+
+                // 하트 그리기 수식을 사용하여 하트를 그립니다.
+                for (let t = 0; t <= 2 * Math.PI; t += 0.01) {
+                    x = heart.width * 16 * Math.pow(Math.sin(t), 3);
+                    y = heart.height * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+
+                    ctx.lineTo(heart.x + x, heart.y - y);
+                }
+
+                // 하트 색상 및 스타일 설정
+                ctx.fillStyle = heart.color;
+                ctx.fill();
+                ctx.closePath();
+
+                scX.value = heart.width;
+                scY.value = heart.height;
+                pstX.value = heart.x;
+                pstY.value = heart.y;
+            }
+
+            // 행렬 연산
+            function hwMatrixMultiply(matrixA, matrixB){
+                const result = [];
+
+                for (let i = 0; i < matrixA.length; i++) {
+                    result[i] = [];
+                    for (let j = 0; j < matrixB[0].length; j++) {
+                        result[i][j] = 0;
+                        for (let k = 0; k < matrixA[0].length; k++) {
+                            result[i][j] += matrixA[i][k] * matrixB[k][j];
+                        }
+                    }
+                }
+                return result;
+            }
+
+            // 이동 행렬
+            function hwTranslateMatrix(psX, psY){
+                var translationMatrix = [
+                    [1, 0, psX],
+                    [0, 1, psY],
+                    [0, 0, 1]
+                ]; // 이동 행렬 생성
+                return hwMatrixMultiply(translationMatrix, [[heart.x], [heart.y], [1]]);
+            }
+
+            // 확대 축소 행렬
+            function hwScaleMatrix(sX, sY){
+                var scaleMatrix = [
+                    [sX, 0, 0],
+                    [0,sY, 0],
+                    [0, 0, 1],
+                ]; // 확대/축소 행렬 생성
+                return hwMatrixMultiply(scaleMatrix, [[heart.x], [heart.y], [1]]);
+            }
+
+            // 회전 행렬
+            function hwRotationMatrix(angle){
+                var radians = angle * (Math.PI / 180);
+                var rotationMatrix = [
+                    [Math.cos(radians), -Math.sin(radians), 0],
+                    [Math.sin(radians), Math.cos(radians), 0],
+                    [0, 0, 1],
+                ]; // 회전 행렬 생성
+                return hwMatrixMultiply(rotationMatrix, [[heart.x], [heart.y], [1]]);
+                drawHeart();
+            }
+
+            document.getElementById('draw_Heart').addEventListener('click', function(){
+                drawHeart();
+            })
+
+            function updateCanvas() {
+                var scX = parseInt(sc_x.value);
+                var scY = parseInt(sc_y.value);
+                drawHeart(scX, scY);
+        }
+
+        }
+    </script>
+</head>
+<body>
+    <div id = "box">
+        <div id = "title">&emsp;&lt;cnavas&gt;</div>
+        <canvas id = "myCanvas" width="400" height="400"></canvas>
+        <div id = "inspector">
+            <div id = "transform">
+                <p id = "tooltitle">&nbsp;Transform</p>
+                <p class = "tool" style="text-align: left">&ensp;Position <span style = "margin-left: 42px;"style="margin-right:0">x <input id = "pst_x" type="text" value="100">&emsp;&emsp;y <input id = "pst_y" type="text"></span></p>
+                <p class = "tool">&nbsp;Rotation<span>x <input id = "rt_x" type="text" value = "">&emsp;&emsp;y <input id = "rt_y" type="text"></span></p>
+                <p class = "tool" style = "margin-bottom : 10px;">&nbsp;Scale&emsp;&ensp;<span>x <input id = "sc_x" type="text" value = "">&emsp;&emsp;y <input id = "sc_y" type="text"></span></p>
+            </div>
+            <div class = "btn" id = "draw_Heart" input = "button">Draw Heart</div>
+            <div class = "btn" id = "undo">Undo</div>
+            <div class = "btn" id = "redo">Redo</div>
+        </div>
+    </div>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>못하겠어요...</title>
     <style>
         *{
             margin : auto;
@@ -81,116 +81,239 @@
             var heart = {
                 x : 200,
                 y : 200,
-                width : 1,
-                height : 1,
-                isDragging: false,
-                
+                width : 5,
+                height : 5,
+                rotationX : 0,
+                rotationY : 0,
+                color : 'red',
+                isDragging : false,
+                isDraggingScale : false,
+                isDraggingRotation : false,
+                dragStartX : 0,
+                dragStartY : 0,
             }
 
-            canvas.addEventListener('mousedown', function(event){
-                
+            canvas.addEventListener("mousedown", (e) => {
+                var mouseX = e.clientX - canvas.getBoundingClientRect().left;
+                var mouseY = e.clientY - canvas.getBoundingClientRect().top;
+
+                // 마우스 클릭 위치가 하트 내부에 있는지 확인
+                if (mouseX >= heart.x - 50 && mouseX <= heart.x + 50 && mouseY >= heart.y - 50 && mouseY <= heart.y + 50) {
+                    heart.isDragging = true;
+                    heart.isDraggingScale = false;
+                    heart.isDraggingRotation = false;
+                    heart.dragStartX = mouseX;
+                    heart.dragStartY = mouseY;
+                }
+
+                // 크기를 변경할 동그라미 클릭 위치 확인
+                if (Math.sqrt(Math.pow(mouseX - (heart.x + 55), 2) + Math.pow(mouseY - (heart.y - 55), 2)) <= 5) {
+                    heart.isDragging = false;
+                    heart.isDraggingRotation = false;
+                    heart.isDraggingScale = true;
+                }
+
+                // 동그라미 클릭 위치 확인
+                if (Math.sqrt(Math.pow(mouseX - (heart.x - 55), 2) + Math.pow(mouseY - (heart.y - 55), 2)) <= 5) {
+                    heart.isDragging = false;
+                    heart.isDraggingScale = false;
+                    heart.isDraggingRotation = true;
+                }
+                console.log("heart.dragStartX :" + heart.dragStartX,"heart.dragStartY :" + heart.dragStartY);
+            })
+
+            function applyMatrix(matrix){
+                if (matrix.length >= 3 && matrix[0].length >= 3) {
+                    if (heart.isDragging) {
+                        heart.x = matrix[0][2];
+                        heart.y = matrix[1][2];
+                    }
+                    else if (heart.isDraggingScale) {
+                        heart.width = matrix[0][0];
+                        heart.height = matrix[1][1];
+                    }
+                    else if(heart.isDraggingRotation){
+                        heart.rotationX = Math.atan2(matrix[0][0], matrix[0][2]) * (180 / Math.PI);
+                        heart.rotationY = Math.atan2(matrix[2][0], matrix[2][2]) * (180 / Math.PI);
+                    }
+                }
+            }
+            
+            canvas.addEventListener("mousemove", handleMouseMove);
+
+            function handleMouseMove(e) {
+                var mouseX = e.clientX - canvas.getBoundingClientRect().left;
+                var mouseY = e.clientY - canvas.getBoundingClientRect().top;
+                if (heart.isDragging) {
+
+                    console.log("mouseX :" + mouseX,"mouseY :" + mouseY);
+                    // 이동 변환에 필요한 값 계산
+                    var translationMatrix = hwTranslateMatrix(mouseX - heart.dragStartX * 0.1,mouseY - heart.dragStartY * 0.1);
+                    console.log("translationMatrix :"+ translationMatrix);
+                    // 크기 변환과 회전을 위한 값 설정 (원하는 크기 및 회전값으로 변경)
+                    var scaleMatrix = hwScaleMatrix(heart.width, heart.height);                  
+                    var rotationMatrix = hwRotationMatrix(0);
+
+                    // 마우스 이동에 따라 하트의 위치 업데이트
+                    var combinedMatrix = hwMatrixMultiply(translationMatrix, hwMatrixMultiply(scaleMatrix, rotationMatrix));
+
+                    console.log("heart.dragStartX :" + heart.dragStartX,"heart.dragStartY :" + heart.dragStartY);
+                    // console.log("combinedMatrix :"+ combinedMatrix);
+                    applyMatrix(combinedMatrix);
+                    // 진심 이게 맞나 싶다.....
+                    // 하트 그리기
+                    drawHeart();
+                }
+                if (heart.isDraggingScale) {
+                    // 동그라미를 드래그하면 크기 조절
+                    var scaleFactor = 1 + (mouseX - heart.dragStartX) * 0.02;
+                    var scaleMatrix = hwScaleMatrix(scaleFactor, scaleFactor);
+
+                    // 크기 조절에 따라 하트의 크기 업데이트
+                    applyMatrix(scaleMatrix);
+
+                    // 하트 그리기
+                    drawHeart();
+                }
+                if(heart.isDraggingRotation){
+                    var angleY = (mouseX - heart.x) * 0.5;
+
+                    // 회전 중심으로의 이동 행렬 적용
+                    var translationMatrix1 = hwTranslateMatrix(heart.x, heart.y);
+
+                    // 회전 행렬 적용
+                    var rotationMatrix = hwRotationMatrix(angleY);
+
+                    // 이동 행렬과 회전 행렬 결합
+                    var combinedMatrix = hwMatrixMultiply(translationMatrix1, rotationMatrix);
+
+                    // 다시 이전 위치로 이동하는 행렬 적용
+                    var translationMatrix2 = hwTranslateMatrix(-heart.x, -heart.y);
+
+                    // 최종 변환 행렬 결합
+                    combinedMatrix = hwMatrixMultiply(combinedMatrix, translationMatrix2);
+
+                    // 변환 행렬 적용
+                    applyMatrix(combinedMatrix);
+
+                    // 하트를 다시 그리기
+                    drawHeart();
+                }
+            }
+
+            canvas.addEventListener("mouseup", () => {
+                heart.isDragging = false;
+                heart.isDraggingScale = false;
+                heart.isDraggingRotation = false;
             })
 
             function drawHeart() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                // 하트를 그리기 위한 코드는 여기에 그대로 둡니다.
                 ctx.beginPath();
 
-                // 하트 그리기 수식을 사용하여 하트를 그립니다.
-                for (var t = 0; t <= 2 * Math.PI; t += 0.01) {
-                    var x1 = 17 * Math.pow(Math.sin(t), 3) * (heart.width) + heart.x;
-                    var y1 = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) * (heart.height) + heart.y;
+                // 하트 그리기
+                for (let t = 0; t <= 2 * Math.PI; t += 0.01) {
+                    x = heart.width * 16 * Math.pow(Math.sin(t), 3);
+                    y = heart.height * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
 
-                    ctx.lineTo(x1, y1);
+                    ctx.lineTo(heart.x + x + heart.rotationX, heart.y - y - heart.rotationY);
                 }
 
                 // 하트 색상 및 스타일 설정
-                ctx.fillStyle = "red";
+                ctx.fillStyle = heart.color;
                 ctx.fill();
                 ctx.closePath();
+
+                // 크기 변경 동그라미
+                ctx.fillStyle = "blue";
+                ctx.beginPath();
+                ctx.arc(heart.x+55, heart.y-55, 5, 0, 2 * Math.PI);
+                ctx.fill();
+
+                // 동그라미
+                ctx.fillStyle = "green";
+                ctx.beginPath();
+                ctx.arc(heart.x-55, heart.y-55, 5, 0, 2 * Math.PI);
+                ctx.fill();
+
+                scX.value = heart.width;
+                scY.value = heart.height;
+                pstX.value = heart.x;
+                pstY.value = heart.y;
+                rtX.value = heart.rotationX;
+                rtY.value = heart.rotationY;
+
             }
 
-            canvas.addEventListener("mousedown", (e) => {
-                var rect = canvas.getBoundingClientRect();
-                var mouseX = e.clientX - rect.left;
-                var mouseY = e.clientY - rect.top;
-
-                // 마우스 클릭 위치가 하트 내부에 있는지 확인
-                if (mouseX >= heart.x - 20 && mouseX <= heart.x + 20 && mouseY >= heart.y - 20 && mouseY <= heart.y + 20) {
-                    heart.isDragging = true;
-                    heart.dragStartX = mouseX - heart.x;
-                    heart.dragStartY = mouseY - heart.y;
-                }
-            })
-
-            canvas.addEventListener("mousemove", (e) => {
-                if (heart.isDragging) {
-                    var rect = canvas.getBoundingClientRect();
-                    var mouseX = e.clientX - rect.left;
-                    var mouseY = e.clientY - rect.top;
-
-                    // 드래그 중인 위치에 따라 하트 이동
-                    heart.x = mouseX - heart.dragStartX;
-                    heart.y = mouseY - heart.dragStartY;
-                    drawHeart();
-                }
-            });
-
-            canvas.addEventListener("mouseup", () => {
-                heart.isDragging = false;
-            })
-
-            
-
             // 행렬 연산
-            function hwMatrixMultiply(){
-                var a11 = matrixA[0];
-                var a12 = matrixA[1];
-                var a21 = matrixA[2];
-                var a22 = matrixA[3];
-                var a31 = matrixA[4];
-                var a32 = matrixA[5];
+            function hwMatrixMultiply(matrixA, matrixB){
+                // A행렬의 행의 길이
+                const rowsA = matrixA.length;
+                // A행렬의 열의 길이
+                const colsA = matrixA[0].length;
+                // B행렬의 행의 길이
+                const rowsB = matrixB.length;
+                // B행렬의 열의 길이
+                const colsB = matrixB[0].length;
 
-                var b11 = matrixB[0];
-                var b12 = matrixB[1];
-                var b21 = matrixB[2];
-                var b22 = matrixB[3];
-                var b31 = matrixB[4];
-                var b32 = matrixB[5];
+                // A행렬의 열과 B행렬의 행이 같지 않으면 못 곱함
+                if (colsA != rowsB) {
+                    throw new Error("행렬 A의 열 수와 행렬 B의 행 수 불일치");
+                }
 
-                var result = [
-                    a11 * b11 + a12 * b21,
-                    a11 * b12 + a12 * b22,
-                    a21 * b11 + a22 * b21,
-                    a21 * b12 + a22 * b22,
-                    a31 * b11 + a32 * b21 + b31,
-                    a31 * b12 + a32 * b22 + b32
-                ];
+                // 결과 행렬 초기화
+                const result = [];
+                // A행렬의 행의 길이보다 i가 작을 때까지 반복
+                for (let i = 0; i < rowsA; i++) {
+                    result[i] = [];
+                    // B행렬의 열의 길이보다 j가 작을 때까지 반복
+                    for (let j = 0; j < colsB; j++) {
+                        result[i][j] = 0;
+                        // A행렬의 열의 길이보다 k가 작을 때까지 반복
+                        for (let k = 0; k < colsA; k++) {
+                            // 2차원 배열에 곱해서 넣기
+                            result[i][j] += matrixA[i][k] * matrixB[k][j];
+                        }
+                    }
+                }
+                // 혹시 몰라서 검토
+                console.log("Result of Matrix Multiplication:", result);
+                return result;
             }
 
             // 이동 행렬
-            function hwTranslateMatrix(matrixA, tx, ty){
-                var translationMatrix = [1, 0, 0, 1, tx, ty]; // 이동 행렬 생성
-                return hwMatrixMultiply(matrixA, translationMatrix); // 변환 행렬과 이동 행렬 곱하기
+            function hwTranslateMatrix(psX, psY){
+                return [
+                    [1, 0, psX],
+                    [0, 1, psY],
+                    [0, 0, 1]
+                ];
             }
 
             // 확대 축소 행렬
-            function hwScaleMatrix(){
-                var scaleMatrix = [scaleX, 0, 0, scaleY, 0, 0]; // 확대/축소 행렬 생성
-                return hwMatrixMultiply(scaleMatrix, yourOriginalMatrix); // 원래 변환 행렬과 확대/축소 행렬을 곱하기
-                drawHeart();
+            function hwScaleMatrix(sX, sY){
+                return [
+                    [sX, 0, 0],
+                    [0,sY, 0],
+                    [0, 0, 1],
+                ];
             }
 
             // 회전 행렬
-            function hwRotationMatrix(){
+            function hwRotationMatrix(angleY){
                 
-                drawHeart();
+                var radiansY = angleY * (Math.PI / 180);
+
+                return [
+                    [Math.cos(radiansY), 0, Math.sin(radiansY)],
+                    [0, 1, 0],
+                    [-Math.sin(radiansY), 0, Math.cos(radiansY)],
+                ];
             }
 
             document.getElementById('draw_Heart').addEventListener('click', function(){
                 drawHeart();
             })
-
         }
     </script>
 </head>
@@ -201,7 +324,7 @@
         <div id = "inspector">
             <div id = "transform">
                 <p id = "tooltitle">&nbsp;Transform</p>
-                <p class = "tool" style="text-align: left">&ensp;Position <span style = "margin-left: 42px;"style="margin-right:0">x <input id = "pst_x" type="text" value="100">&emsp;&emsp;y <input id = "pst_y" type="text"></span></p>
+                <p class = "tool" style="text-align: left">&ensp;Position <span style = "margin-left: 42px;"style="margin-right:0">x <input id = "pst_x" type="text">&emsp;&emsp;y <input id = "pst_y" type="text"></span></p>
                 <p class = "tool">&nbsp;Rotation<span>x <input id = "rt_x" type="text" value = "">&emsp;&emsp;y <input id = "rt_y" type="text"></span></p>
                 <p class = "tool" style = "margin-bottom : 10px;">&nbsp;Scale&emsp;&ensp;<span>x <input id = "sc_x" type="text" value = "">&emsp;&emsp;y <input id = "sc_y" type="text"></span></p>
             </div>
